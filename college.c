@@ -10,21 +10,43 @@ void Find();
 void byID();
 void byname();
 void bycourse();
+void DeleteStudent();
+void UpdateStudent();
+
+struct student{
+    int id;
+    char name[50];
+    int cID;
+};
+
+struct course{
+    int cID;
+    char cname[50];
+    float cfees;
+};
+
+struct fees{
+    float pfees;
+    int sID;
+};
 
 int main()
 {
     int value;
     while (1)
     {
-        printf("---------Collage Management System-----------\n");
-        printf("Enter your choice\n");
-        printf("1.Add Student\n");
-        printf("2.Find Student by:\n");
-        printf("3.Add Course\n");
-        printf("4.Fees Details\n");
-        printf("5.View Student Details\n");
-        printf("6.Exit the program\n");
+        printf("\n---------College Management System-----------\n");
+        printf("1. Add Student\n");
+        printf("2. Find Student\n");
+        printf("3. Add Course\n");
+        printf("4. Fees Details\n");
+        printf("5. View Student Details\n");
+        printf("6. Delete Student\n");
+        printf("7. Update Student\n");
+        printf("8. Exit\n");
+        printf("Enter your choice: ");
         scanf("%d", &value);
+
         switch (value)
         {
         case 1:
@@ -43,61 +65,50 @@ int main()
             ViewStudent();
             break;
         case 6:
-            printf("Exiting program...");
+            DeleteStudent();
+            break;
+        case 7:
+            UpdateStudent();
+            break;
+        case 8:
             exit(0);
-
         default:
             printf("Invalid choice\n");
         }
     }
     return 0;
 }
-struct student
-{
-    int id;
-    char name[50];
-    int cID;
-};
-struct course
-{
-    int cID;
-    char cname[50];
-    float cfees;
-};
-struct fees
-{
-    float pfees;
-    int sID;
-};
 
 void StudentManagement()
 {
     struct student s;
     FILE *f = fopen("student.dat", "ab");
-    printf("Enter ID : ");
+    printf("Enter Student ID: ");
     scanf("%d", &s.id);
-    printf("Enter name : ");
+    printf("Enter Name: ");
     scanf("%s", s.name);
-    printf("Enter couse ID : ");
+    printf("Enter Course ID: ");
     scanf("%d", &s.cID);
     fwrite(&s, sizeof(s), 1, f);
     fclose(f);
-    printf("========= Student added successfully ========\n");
+    printf("Student added successfully\n");
 }
+
 void CourseManagement()
 {
     struct course c;
     FILE *f = fopen("course.dat", "ab");
-    printf("Enter course ID: ");
+    printf("Enter Course ID: ");
     scanf("%d", &c.cID);
-    printf("Enter course name: ");
+    printf("Enter Course Name: ");
     scanf("%s", c.cname);
-    printf("Enter course fees: ");
+    printf("Enter Course Fees: ");
     scanf("%f", &c.cfees);
     fwrite(&c, sizeof(c), 1, f);
     fclose(f);
-    printf("=========Course added successfully==========\n");
+    printf("Course added successfully\n");
 }
+
 void FeesManagement()
 {
     struct fees fe;
@@ -108,8 +119,9 @@ void FeesManagement()
     scanf("%f", &fe.pfees);
     fwrite(&fe, sizeof(fe), 1, f);
     fclose(f);
-    printf("========Fees updated successfully==========\n");
+    printf("Fees updated successfully\n");
 }
+
 void ViewStudent()
 {
     struct student s;
@@ -119,7 +131,7 @@ void ViewStudent()
     FILE *fc = fopen("course.dat", "rb");
     FILE *ff = fopen("fees.dat", "rb");
     int id, found = 0;
-    float totalFees = 0, paidfees = 0;
+    float totalFees = 0, paidFees = 0;
     printf("Enter Student ID: ");
     scanf("%d", &id);
     while (fread(&s, sizeof(s), 1, fs))
@@ -130,16 +142,17 @@ void ViewStudent()
             break;
         }
     }
-    if (found == 0)
+    if (!found)
     {
-        printf("No Student Found\n");
-        fclose(fs), fclose(fc), fclose(ff);
+        printf("Student not found\n");
+        fclose(fs);
+        fclose(fc);
+        fclose(ff);
         return;
     }
     while (fread(&c, sizeof(c), 1, fc))
     {
-        if (c.cID == s.cID)
-        {
+        if (c.cID == s.cID){
             totalFees = c.cfees;
             break;
         }
@@ -147,29 +160,28 @@ void ViewStudent()
     while (fread(&fe, sizeof(fe), 1, ff))
     {
         if (fe.sID == s.id)
-        {
-            paidfees += fe.pfees;
-        }
+            paidFees += fe.pfees;
     }
-    printf("\n===== STUDENT FULL DETAILS =====\n");
-    printf("Student ID   : %d\n", s.id);
-    printf("Name         : %s\n", s.name);
-    printf("Course ID    : %d\n", c.cID);
-    printf("Course Name  : %s\n", c.cname);
-    printf("Total Fees   : %.2f\n", totalFees);
-    printf("Fees Paid    : %.2f\n", paidfees);
-    printf("Pending Fees : %.2f\n", totalFees - paidfees);
-    printf("================================\n");
-    fclose(fs), fclose(fc), fclose(ff);
+    printf("\n----- Student Details -----\n");
+    printf("ID: %d\n", s.id);
+    printf("Name: %s\n", s.name);
+    printf("Course ID: %d\n", s.cID);
+    printf("Total Fees: %.2f\n", totalFees);
+    printf("Fees Paid: %.2f\n", paidFees);
+    printf("Pending Fees: %.2f\n", totalFees - paidFees);
+    fclose(fs);
+    fclose(fc);
+    fclose(ff);
 }
 void Find()
 {
-    int val;
-    printf("1.ID\n");
-    printf("2.First name\n");
-    printf("3.Course\n");
-    scanf("%d", &val);
-    switch (val)
+    int ch;
+    printf("\n1. Find by ID\n");
+    printf("2. Find by Name\n");
+    printf("3. Find by Course\n");
+    printf("Enter choice: ");
+    scanf("%d", &ch);
+    switch (ch)
     {
     case 1:
         byID();
@@ -182,7 +194,6 @@ void Find()
         break;
     default:
         printf("Invalid choice\n");
-        break;
     }
 }
 void byID()
@@ -190,74 +201,122 @@ void byID()
     struct student s;
     FILE *fs = fopen("student.dat", "rb");
     int id, found = 0;
-    printf("Enter Student ID:  ");
+    printf("Enter Student ID: ");
     scanf("%d", &id);
     while (fread(&s, sizeof(s), 1, fs))
     {
         if (s.id == id)
         {
             found = 1;
+            printf("Name: %s\n", s.name);
+            printf("Course ID: %d\n", s.cID);
             break;
         }
     }
-    if (found == 0)
-    {
-        printf("No Student Found\n");
-        fclose(fs);
-        return;
-    }
-    else
-    {
-        printf("Name         : %s\n", s.name);
-        printf("Course ID    : %d\n", s.cID);
-    }
+    if (!found)
+        printf("Student not found\n");
     fclose(fs);
 }
 void byname()
 {
     struct student s;
-    int found = 0;
     FILE *fs = fopen("student.dat", "rb");
-    char FirstName[50];
-    printf("Enter First name:   ");
-    scanf("%s", FirstName);
+    char name[50];
+    int found = 0;
+    printf("Enter name: ");
+    scanf("%s", name);
     while (fread(&s, sizeof(s), 1, fs))
     {
-        if (strcmp(s.name, FirstName) == 0)
+        if (strcmp(s.name, name) == 0)
         {
             found = 1;
-            printf("Student ID   : %d\n", s.id);
-            printf("Name         : %s\n", s.name);
-            printf("Course ID    : %d\n", s.cID);
+            printf("ID: %d\n", s.id);
+            printf("Name: %s\n", s.name);
+            printf("Course ID: %d\n", s.cID);
         }
     }
-    if (found == 0)
-    {
+    if (!found)
         printf("Student not found\n");
-    }
     fclose(fs);
 }
 void bycourse()
 {
     struct student s;
     FILE *fs = fopen("student.dat", "rb");
-    int id;
-    int found = 0;
-    printf("Enter Course ID:   \n");
+    int cid, found = 0;
+    printf("Enter Course ID: ");
+    scanf("%d", &cid);
+    while (fread(&s, sizeof(s), 1, fs))
+    {
+        if (s.cID == cid)
+        {
+            found = 1;
+            printf("ID: %d  Name: %s\n", s.id, s.name);
+        }
+    }
+    if (!found)
+        printf("No students found for this course\n");
+    fclose(fs);
+}
+void DeleteStudent()
+{
+    struct student s;
+    FILE *fs = fopen("student.dat", "rb");
+    FILE *ft = fopen("temp.dat", "wb");
+    int id, found = 0;
+    printf("Enter Student ID to delete: ");
     scanf("%d", &id);
     while (fread(&s, sizeof(s), 1, fs))
     {
-        if (s.cID == id)
-        {
+        if (s.id == id)
             found = 1;
-            printf("Student ID   : %d\n", s.id);
-            printf("Name         : %s\n", s.name);
-            printf("Course ID    : %d\n", s.cID);
-        }
-    }
-    if (found == 0)
-    {
-        printf("Invalid Course ID\n");
+        else
+            fwrite(&s, sizeof(s), 1, ft);
     }
     fclose(fs);
+    fclose(ft);
+    remove("student.dat");
+    rename("temp.dat", "student.dat");
+    if (found)
+        printf("Student deleted successfully\n");
+    else
+        printf("Student not found\n");
+}
+void UpdateStudent()
+{
+    struct student s;
+    FILE *fs = fopen("student.dat", "rb");
+    FILE *ft = fopen("temp.dat", "wb");
+    int id, choice, found = 0;
+    printf("Enter Student ID to update: ");
+    scanf("%d", &id);
+    while (fread(&s, sizeof(s), 1, fs))
+    {
+        if (s.id == id)
+        {
+            found = 1;
+            printf("1. Update Name\n");
+            printf("2. Update Course ID\n");
+            scanf("%d", &choice);
+            if (choice == 1)
+            {
+                printf("Enter new name: ");
+                scanf("%s", s.name);
+            }
+            else if (choice == 2)
+            {
+                printf("Enter new Course ID: ");
+                scanf("%d", &s.cID);
+            }
+        }
+        fwrite(&s, sizeof(s), 1, ft);
+    }
+    fclose(fs);
+    fclose(ft);
+    remove("student.dat");
+    rename("temp.dat", "student.dat");
+    if (found)
+        printf("Student updated successfully\n");
+    else
+        printf("Student not found\n");
 }
